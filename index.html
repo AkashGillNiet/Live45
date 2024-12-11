@@ -180,6 +180,8 @@
     function closePopup() {
         const popup = document.getElementById('popup');
         popup.style.display = 'none';
+        const streamingContainer = document.getElementById('streaming-container');
+        streamingContainer.style.display = 'block';  // Show the streaming container after closing popup
     }
 </script>
 
