@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricketSparx</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Full-screen popup */
+        #popup {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: white;
+            z-index: 9999;
+            text-align: center;
+        }
+        #popup button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #join-now {
+            background-color: #007bff;
+            color: white;
+        }
+        #already-joined {
+            background-color: #28a745;
+            color: white;
+        }
+
+        /* Header text */
+        #header {
+            display: flex;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+        }
+        #header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* Streaming container */
+        #streaming-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border: 1px solid white;
+        }
+
+        /* Quality Selector */
+        #quality-selector {
+            margin: 10px 0;
+        }
+        #quality-selector select {
+            padding: 5px;
+            border: 1px solid white;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+            font-size: 16px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
+</head>
+<body>
+
+<!-- Header with Logo -->
+<div id="header">
+    <img src="https://via.placeholder.com/40" alt="Logo"> <!-- Replace with your logo URL -->
+    CricketSparx
+</div>
+
+<!-- Full-Screen Popup -->
+<div id="popup">
+    <p>Join our Telegram channel <a href="https://t.me/CricketSparx" target="_blank" style="color: lightblue; text-decoration: none;">@CricketSparx</a> for more links!</p>
+    <button id="join-now" onclick="joinNow()">Join Now</button>
+    <button id="already-joined" onclick="closePopup()">Already Joined</button>
+</div>
+
+<!-- Video Streaming Section -->
+<div id="streaming-container">
+    <video id="videoPlayer" controls></video>
+    <div id="quality-selector">
+        <label for="quality">Select Quality: </label>
+        <select id="quality" onchange="changeQuality()">
+            <option value="-1" selected>Auto</option>
+        </select>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('videoPlayer');
+    const qualitySelector = document.getElementById('quality');
+    const hls = new Hls();
+
+    // Function to get the URL parameter
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // Get HLS URL from query parameter
+    const hlsUrl = getQueryParam('url');
+
+    if (hlsUrl) {
+        // Initialize HLS.js
+        if (Hls.isSupported()) {
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(video);
+
+            // Populate Quality Levels
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                const levels = hls.levels;
+                levels.forEach((level, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${level.height}p`; // Quality in resolution
+                    qualitySelector.appendChild(option);
+                });
+            });
+
+            // Handle Quality Change
+            function changeQuality() {
+                const quality = parseInt(qualitySelector.value);
+                if (quality === -1) {
+                    hls.currentLevel = -1; // Auto Quality
+                } else {
+                    hls.currentLevel = quality; // Set selected quality
+                }
+            }
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS Support (e.g., Safari)
+            video.src = hlsUrl;
+        }
+    } else {
+        alert("No URL provided. Please add '?url=your_hls_link.m3u8' to the URL.");
+    }
+
+    // Function to handle "Join Now" button
+    function joinNow() {
+        window.open('https://t.me/CricketSparx', '_blank');
+    }
+
+    // Function to close the popup
+    function closePopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
