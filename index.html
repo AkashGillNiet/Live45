@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CricketSparx</title>
     <style>
         body {
             background-color: black;
@@ -13,7 +12,6 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
             height: 100vh;
         }
@@ -53,7 +51,6 @@
 
         /* Streaming container */
         #streaming-container {
-            display: none;
             width: 100%;
             max-width: 800px;
             margin: 20px auto;
@@ -69,16 +66,16 @@
         /* Settings icon for quality change */
         #settings-icon {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            bottom: 50px;
+            right: 60px;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 20px;
             color: white;
         }
         #quality-selector {
             display: none;
             position: absolute;
-            top: 50px;
+            bottom: 90px;
             right: 10px;
             background: black;
             padding: 10px;
@@ -93,6 +90,19 @@
             color: white;
             font-size: 16px;
         }
+
+        /* Telegram Button */
+        #telegram-btn {
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -106,6 +116,10 @@
 
 <!-- Streaming Video -->
 <div id="streaming-container">
+    <video id="videoPlayer" controls>
+        <source id="videoSource" src="" type="application/x-mpegURL">
+        Your browser does not support the video tag.
+    </video>
     <div id="settings-icon" onclick="toggleQualitySelector()">⚙</div>
     <div id="quality-selector">
         <label for="quality">Select Quality:</label>
@@ -113,10 +127,7 @@
             <option value="-1" selected>Auto</option>
         </select>
     </div>
-    <video id="videoPlayer" controls>
-        <source id="videoSource" src="" type="application/x-mpegURL">
-        Your browser does not support the video tag.
-    </video>
+    <button id="telegram-btn" onclick="joinTelegram()">Join Telegram</button>
 </div>
 
 <script>
@@ -158,13 +169,15 @@
             const selectedQuality = parseInt(document.getElementById('quality').value);
             hls.currentLevel = selectedQuality === -1 ? -1 : selectedQuality;
         }
-
-        // Show the streaming container
-        document.getElementById('streaming-container').style.display = 'block';
     }
 
     // Function to handle "Join Now" button
     function joinNow() {
+        window.open('https://t.me/CricketSparx', '_blank');
+    }
+
+    // Function to handle Telegram button
+    function joinTelegram() {
         window.open('https://t.me/CricketSparx', '_blank');
     }
 
