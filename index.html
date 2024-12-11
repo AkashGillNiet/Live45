@@ -53,19 +53,11 @@
 
         /* Header text */
         #header {
-            display: flex;
-            align-items: center;
             font-size: 28px;
             font-weight: bold;
             margin: 20px 0;
             text-align: center;
             color: white;
-        }
-        #header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
         }
 
         /* Streaming container */
@@ -75,6 +67,7 @@
             max-width: 800px;
             margin: 20px auto;
             text-align: center;
+            position: relative;
         }
         video {
             width: 100%;
@@ -82,9 +75,24 @@
             border: 1px solid white;
         }
 
-        /* Quality Selector */
+        /* Settings icon for quality change */
+        #settings-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+        }
         #quality-selector {
-            margin: 10px 0;
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: black;
+            padding: 10px;
+            border: 1px solid white;
+            border-radius: 5px;
         }
         #quality-selector select {
             padding: 5px;
@@ -95,15 +103,11 @@
             font-size: 16px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
 </head>
 <body>
 
-<!-- Header with Logo -->
-<div id="header">
-    <img src="https://via.placeholder.com/40" alt="Logo"> <!-- Replace with your logo URL -->
-    CricketSparx
-</div>
+<!-- Header Text -->
+<div id="header">CricketSparx</div>
 
 <!-- Full-Screen Popup -->
 <div id="popup">
@@ -112,21 +116,30 @@
     <button id="already-joined" onclick="closePopup()">Already Joined</button>
 </div>
 
-<!-- Video Streaming Section -->
+<!-- Streaming Video -->
 <div id="streaming-container">
-    <video id="videoPlayer" controls></video>
+    <div id="settings-icon" onclick="toggleQualitySelector()">⚙</div>
     <div id="quality-selector">
-        <label for="quality">Select Quality: </label>
+        <label for="quality">Select Quality:</label>
         <select id="quality" onchange="changeQuality()">
             <option value="-1" selected>Auto</option>
         </select>
     </div>
+    <video id="videoPlayer" controls>
+        <source id="videoSource" src="" type="application/x-mpegURL">
+        Your browser does not support the video tag.
+    </video>
 </div>
 
 <script>
-    const video = document.getElementById('videoPlayer');
-    const qualitySelector = document.getElementById('quality');
-    const hls = new Hls();
+    const videoPlayer = document.getElementById('videoPlayer');
+    const qualitySelector = document.getElementById('quality-selector');
+    const settingsIcon = document.getElementById('settings-icon');
+
+    // Function to toggle the quality selector dropdown
+    function toggleQualitySelector() {
+        qualitySelector.style.display = qualitySelector.style.display === 'block' ? 'none' : 'block';
+    }
 
     // Function to get the URL parameter
     function getQueryParam(param) {
@@ -134,41 +147,32 @@
         return urlParams.get(param);
     }
 
-    // Get HLS URL from query parameter
-    const hlsUrl = getQueryParam('url');
+    // Get the streaming URL from the query parameter
+    const streamingURL = getQueryParam('url');
 
-    if (hlsUrl) {
-        // Initialize HLS.js
-        if (Hls.isSupported()) {
-            hls.loadSource(hlsUrl);
-            hls.attachMedia(video);
+    // Check if the streaming URL is provided
+    if (streamingURL) {
+        const hls = new Hls();
+        hls.loadSource(streamingURL);
+        hls.attachMedia(videoPlayer);
 
-            // Populate Quality Levels
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                const levels = hls.levels;
-                levels.forEach((level, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = `${level.height}p`; // Quality in resolution
-                    qualitySelector.appendChild(option);
-                });
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            const levels = hls.levels;
+            levels.forEach((level, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${level.height}p`;
+                document.getElementById('quality').appendChild(option);
             });
+        });
 
-            // Handle Quality Change
-            function changeQuality() {
-                const quality = parseInt(qualitySelector.value);
-                if (quality === -1) {
-                    hls.currentLevel = -1; // Auto Quality
-                } else {
-                    hls.currentLevel = quality; // Set selected quality
-                }
-            }
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Native HLS Support (e.g., Safari)
-            video.src = hlsUrl;
+        function changeQuality() {
+            const selectedQuality = parseInt(document.getElementById('quality').value);
+            hls.currentLevel = selectedQuality === -1 ? -1 : selectedQuality;
         }
-    } else {
-        alert("No URL provided. Please add '?url=your_hls_link.m3u8' to the URL.");
+
+        // Show the streaming container
+        document.getElementById('streaming-container').style.display = 'block';
     }
 
     // Function to handle "Join Now" button
@@ -180,8 +184,6 @@
     function closePopup() {
         const popup = document.getElementById('popup');
         popup.style.display = 'none';
-        const streamingContainer = document.getElementById('streaming-container');
-        streamingContainer.style.display = 'block';  // Show the streaming container after closing popup
     }
 </script>
 
